@@ -7,7 +7,7 @@
   "license": "ISC",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "dev": "tsc && node dist/app.js",
+    "dev": "tsc && node dist/app.js > output.log",
     "test": "node dist/test/index.js"
   },
   "devDependencies": {
@@ -21,9 +21,11 @@
   },
   "dependencies": {
     "@types/cheerio": "^0.22.22",
+    "@types/jsonexport": "^3.0.1",
     "@types/jsonfile": "^6.0.0",
     "cheerio": "^1.0.0-rc.3",
     "isomorphic-fetch": "^2.2.1",
+    "jsonexport": "^3.2.0",
     "jsonfile": "^6.1.0"
   }
 }

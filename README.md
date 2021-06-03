@@ -7,7 +7,6 @@ I took the liberty to export the CSV file and import them into Notion. Feel free
 ### To start local development
 
 ```
-yarn
 yarn dev
 ```
 

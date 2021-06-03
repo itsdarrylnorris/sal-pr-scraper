@@ -2,7 +2,9 @@ import cheerio from 'cheerio'
 import fs from 'fs'
 import 'isomorphic-fetch'
 import jsonexport from 'jsonexport/dist'
+import AbortController from 'node-abort-controller'
 import { logging, sleep } from './utils'
+
 const fsPromises = fs.promises
 
 /**
@@ -13,11 +15,19 @@ const fsPromises = fs.promises
 export class SalPrToCsv {
   private baseUrl: string = 'https://www.sal.pr'
 
-  async init() {
+  /**
+   * Async function to start the execution of the script.
+   */
+  async init(): Promise<void> {
     await this.getListOfResturants()
   }
 
-  async getListOfResturants() {
+  /**
+   * Get's list of resturants CSV file
+   *
+   * @returns
+   */
+  async getListOfResturants(): Promise<void> {
     let pageCount: number = 0
     let maxOfFetchResults: number = 1620 // Real number it's 1620
     let payload: Response | undefined
@@ -28,7 +38,6 @@ export class SalPrToCsv {
 
     while (pageCount !== maxOfFetchResults) {
       const fetchPathAbortController = new AbortController()
-      const timeoutId = setTimeout(() => fetchPathAbortController.abort(), 5000)
 
       fetchPath = `${this.baseUrl}/?search=5&s=restaurantes&field_name=&order=a&start=${pageCount}`
 

@@ -17,6 +17,7 @@ const cheerio_1 = __importDefault(require("cheerio"));
 const fs_1 = __importDefault(require("fs"));
 require("isomorphic-fetch");
 const dist_1 = __importDefault(require("jsonexport/dist"));
+const node_abort_controller_1 = __importDefault(require("node-abort-controller"));
 const utils_1 = require("./utils");
 const fsPromises = fs_1.default.promises;
 class SalPrToCsv {
@@ -38,10 +39,11 @@ class SalPrToCsv {
             let alreadyCheckResturant = [];
             let resturantsData = [];
             while (pageCount !== maxOfFetchResults) {
+                const fetchPathAbortController = new node_abort_controller_1.default();
                 fetchPath = `${this.baseUrl}/?search=5&s=restaurantes&field_name=&order=a&start=${pageCount}`;
                 utils_1.logging(`Trying to fetch url: ${fetchPath}`);
                 try {
-                    payload = yield fetch(fetchPath);
+                    payload = yield fetch(fetchPath, { signal: fetchPathAbortController.signal });
                     rawData = yield payload.text();
                     const $ = cheerio_1.default.load(rawData);
                     if (!payload) {
@@ -74,8 +76,9 @@ class SalPrToCsv {
                                 phoneNumber: $productData('.i_contact').eq(0).next().text()
                                     ? $productData('.i_contact').eq(0).next().text()
                                     : '',
-                                facebook: ((_b = $productData('.i_facebook').eq(0).attr('href')) === null || _b === void 0 ? void 0 : _b.toString()) ?
-                                    $productData('.i_facebook').eq(0).attr('href').toString()
+                                facebook: ((_b = $productData('.i_facebook').eq(0).attr('href')) === null || _b === void 0 ? void 0 : _b.toString())
+                                    ?
+                                        $productData('.i_facebook').eq(0).attr('href').toString()
                                     : '',
                                 address1: $productData('p[itemprop="streetAddress"]').eq(0).text()
                                     ? $productData('p[itemprop="streetAddress"]').eq(0).text()
@@ -85,7 +88,9 @@ class SalPrToCsv {
                                     : '',
                                 hours: $productData('.i_time').eq(0).next().text() ? $productData('.i_time').eq(0).next().text() : '',
                                 resturantType: $productData('ul .food-type li').text() ? $productData('ul .food-type li').text() : '',
-                                resturantWebsite: ((_c = $productData('#button_website').eq(0).attr('href')) === null || _c === void 0 ? void 0 : _c.toString()) ? (_d = $productData('#button_website').eq(0).attr('href')) === null || _d === void 0 ? void 0 : _d.toString() : '',
+                                resturantWebsite: ((_c = $productData('#button_website').eq(0).attr('href')) === null || _c === void 0 ? void 0 : _c.toString())
+                                    ? (_d = $productData('#button_website').eq(0).attr('href')) === null || _d === void 0 ? void 0 : _d.toString()
+                                    : '',
                             };
                             resturantsData.push(resturantInformation);
                             utils_1.logging(`Found something in ${productPath}`);
@@ -103,7 +108,7 @@ class SalPrToCsv {
             }
             utils_1.logging('Done getting data');
             try {
-                const csv = yield dist_1.default(resturantsData, { rowDelimiter: '|' });
+                const csv = yield dist_1.default(resturantsData);
                 yield fsPromises.writeFile(__dirname + 'data.csv', csv);
                 utils_1.logging('Total ... ', { csv });
             }
